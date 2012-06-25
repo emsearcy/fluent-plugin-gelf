@@ -16,13 +16,11 @@ class GELFTailInput < TailInput
   end
 
   def configure_parser(conf)
-    @parser = TextParser.new
-
     # Template 'apache' (override of tail's 'apache')
     # short_message is "common log" format
     # full_message is "combined log" format
 
-    @parser.register_template('apache', /^(?<full_message>(?<short_message>(?<client>[^ ]*) [^ ]* (?<user>[^ ]*) \[(?<time>[^\]]*)\] "(?<method>\S+)(?: +(?<path>[^ ]*) +\S*)?" (?<code>[^ ]*) (?<size>[^ ]*))(?: "(?<referer>[^\"]*)" "(?<agent>[^\"]*)")?)$/, {'time_format'=>"%d/%b/%Y:%H:%M:%S %z"})
+    TextParser.register_template('gelf-apache', /^(?<full_message>(?<short_message>(?<client>[^ ]*) [^ ]* (?<user>[^ ]*) \[(?<time>[^\]]*)\] "(?<method>\S+)(?: +(?<path>[^ ]*) +\S*)?" (?<code>[^ ]*) (?<size>[^ ]*))(?: "(?<referer>[^\"]*)" "(?<agent>[^\"]*)")?)$/, "%d/%b/%Y:%H:%M:%S %z")
 
     # Template 'nginx'
     # short_message is "common log" format
@@ -39,8 +37,9 @@ class GELFTailInput < TailInput
     #                    '$upstream_cache_status "$upstream_http_cache_control" '
     #                    '$upstream_status time $upstream_response_time';
 
-    @parser.register_template('nginx', /^(?<full_message>(?<short_message>(?<client>[^ ]*) [^ ]* (?<user>[^ ]*) \[(?<time>[^\]]*)\] "(?<method>\S+)(?: +(?<path>[^ ]*) +\S*)?" (?<code>[^ ]*) (?<size>[^ ]*))(?: "(?<referer>[^\"]*)" "(?<agent>[^\"]*)")?)(?: "(?<x-forwarded-for>[^\"]*)")?(?: [0-9]+\.(?<msec>[0-9]{3}) (?<schema>[^ ]+) "(?<vhost>[^\"]*)" time (?<request_time>[0-9.]+) recv (?<request_length>[0-9]+) sent (?<bytes_sent>[0-9]+) \((?<body_bytes_sent>[0-9]+)\) from (?<upstream_addr>.+) (?<upstream_cache_status>.+) "(?<upstream_http_cache_control>[^\"]*)" (?<upstream_status>.+) time (?<upstream_response_time>.+))?$/, {'time_format'=>"%d/%b/%Y:%H:%M:%S %z"})
+    TextParser.register_template('gelf-nginx', /^(?<full_message>(?<short_message>(?<client>[^ ]*) [^ ]* (?<user>[^ ]*) \[(?<time>[^\]]*)\] "(?<method>\S+)(?: +(?<path>[^ ]*) +\S*)?" (?<code>[^ ]*) (?<size>[^ ]*))(?: "(?<referer>[^\"]*)" "(?<agent>[^\"]*)")?)(?: "(?<x-forwarded-for>[^\"]*)")?(?: [0-9]+\.(?<msec>[0-9]{3}) (?<schema>[^ ]+) "(?<vhost>[^\"]*)" time (?<request_time>[0-9.]+) recv (?<request_length>[0-9]+) sent (?<bytes_sent>[0-9]+) \((?<body_bytes_sent>[0-9]+)\) from (?<upstream_addr>.+) (?<upstream_cache_status>.+) "(?<upstream_http_cache_control>[^\"]*)" (?<upstream_status>.+) time (?<upstream_response_time>.+))?$/, "%d/%b/%Y:%H:%M:%S %z")
 
+    @parser = TextParser.new
     @parser.configure(conf)
   end
 
@@ -55,7 +54,7 @@ class GELFTailInput < TailInput
         record['host'] = @gelfhost.to_s
     end
 
-    time, record
+    return time, record
   end
 
 end

@@ -43,7 +43,7 @@ class GELFTailInput < TailInput
     #                    '$upstream_cache_status "$upstream_http_cache_control" '
     #                    '$upstream_status time $upstream_response_time';
 
-    TextParser.register_template('gelf-nginx', /^(?<full_message>(?<short_message>(?<client>[^ ]*) [^ ]* (?<user>[^ ]*) \[(?<time>[^\]]*)\] "(?<method>\S+)(?: +(?<path>[^ ]*) +\S*)?" (?<code>[^ ]*) (?<size>[^ ]*))(?: "(?<referer>[^\"]*)" "(?<agent>[^\"]*)")?)(?: "(?<x-forwarded-for>[^\"]*)")?(?: [0-9]+\.(?<msec>[0-9]{3}) (?<schema>[^ ]+) "(?<vhost>[^\"]*)" time (?<request_time>[0-9.]+) recv (?<request_length>[0-9]+) sent (?<bytes_sent>[0-9]+) \((?<body_bytes_sent>[0-9]+)\) from (- - "-" - time -|(?<upstream_addr>.+) (?<upstream_cache_status>.+) "(?<upstream_http_cache_control>[^\"]*)" (?<upstream_status>.+) time (?<upstream_response_time>.+)))?$/, "%d/%b/%Y:%H:%M:%S %z")
+    TextParser.register_template('gelf-nginx', /^(?<full_message>(?<short_message>(?<client>[^ ]*) [^ ]* (?<user>[^ ]*) \[(?<time>[^\]]*)\] "(?<method>\S+)(?: +(?<path>[^ ]*) +\S*)?" (?<code>[^ ]*) (?<size>[^ ]*))(?: "(?<referer>[^\"]*)" "(?<agent>[^\"]*)")?)(?: "(?<x-forwarded-for>[^\"]*)")?(?: [0-9]+\.(?<msec>[0-9]{3}) (?<scheme>[^ ]+) "(?<vhost>[^\"]*)" time (?<request_time>[0-9.]+) recv (?<request_length>[0-9]+) sent (?<bytes_sent>[0-9]+) \((?<body_bytes_sent>[0-9]+)\) from (- - "-" - time -|(?<upstream_addr>.+) (?<upstream_cache_status>.+) "(?<upstream_http_cache_control>[^\"]*)" (?<upstream_status>.+) time (?<upstream_response_time>.+)))?$/, "%d/%b/%Y:%H:%M:%S %z")
 
     @parser = TextParser.new
     @parser.configure(conf)
@@ -52,12 +52,14 @@ class GELFTailInput < TailInput
   def parse_line(line)
     time, record = super(line)
     
-    if @gelfhost === nil then
-      if !record.has_key?('host') then
-        record['host'] = Socket.gethostname
-      end
-    elsif @gelfhost != '!' then
+    if !record.nil? then
+      if @gelfhost.nil? then
+        if !record.has_key?('host') then
+          record['host'] = Socket.gethostname
+        end
+      elsif @gelfhost != '!' then
         record['host'] = @gelfhost.to_s
+      end
     end
 
     return time, record

@@ -16,13 +16,19 @@ class GELFTailInput < TailInput
   end
 
   def configure_parser(conf)
-    # Template 'apache' (override of tail's 'apache')
+    # Template 'gelf-apache'
     # short_message is "common log" format
     # full_message is "combined log" format
 
     TextParser.register_template('gelf-apache', /^(?<full_message>(?<short_message>(?<client>[^ ]*) [^ ]* (?<user>[^ ]*) \[(?<time>[^\]]*)\] "(?<method>\S+)(?: +(?<path>[^ ]*) +\S*)?" (?<code>[^ ]*) (?<size>[^ ]*))(?: "(?<referer>[^\"]*)" "(?<agent>[^\"]*)")?)$/, "%d/%b/%Y:%H:%M:%S %z")
 
-    # Template 'nginx'
+    # Template 'gelf-apache-error'
+    # short_message is a central non-greedy capture surrounded by attempts to grab Apache, PHP fields
+    # full_message is entire line
+
+    TextParser.register_template('gelf-apache-error', /^(?<full_message>(\[(?<time>[^\]]*)\] \[(?<level>[^\]]*)\] \[[^\]]*\] )?(?<short_message>(PHP (?<php>[A-Za-z]+):)?.*?)( in (?<file>\/.*) on line (?<line>[0-9]+)(, referer: (?<referer>[^ ]*).*)?)?)$/, "%a %b %d %H:%M:%S %Y")
+
+    # Template 'gelf-nginx'
     # short_message is "common log" format
     # full_message is "combined log" format
     #

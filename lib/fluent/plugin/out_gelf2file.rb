@@ -15,7 +15,11 @@ class GELF2FileOutput < BufferedOutput
   end
 
   def configure(conf)
+    conf['buffer_chunk_limit'] ||= '256k'
+    conf['flush_interval'] ||= '15s'
+
     super
+
     raise ConfigError, "'path' parameter is required on file output" unless conf.has_key?('path')
 
     # Support using UTC for path formatting, similar to time slice file plugin
@@ -24,6 +28,7 @@ class GELF2FileOutput < BufferedOutput
     elsif conf['localtime']
       @localtime = true
     end
+
   end
 
   def start
@@ -60,6 +65,7 @@ class GELF2FileOutput < BufferedOutput
 
     # Write chunk
     chunk.write_to(@outfile)
+    @outfile.flush
   end
 
   def openlog

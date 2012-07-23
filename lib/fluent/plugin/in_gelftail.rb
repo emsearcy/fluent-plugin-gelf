@@ -2,7 +2,7 @@ module Fluent
 
 class GELFTailInput < TailInput
 
-  Plugin.register_input("gelftail", self)    
+  Plugin.register_input("gelftail", self)
 
   # gelfhost parameter:
   #   nil (default)     auto-add our hostname unless "host" is parsed from file
@@ -20,13 +20,21 @@ class GELFTailInput < TailInput
     # short_message is "common log" format
     # full_message is "combined log" format
 
-    TextParser.register_template('gelf-apache', /^(?<full_message>(?<short_message>(?<client>[^ ]*) [^ ]* (?<user>[^ ]*) \[(?<time>[^\]]*)\] "(?<method>\S+)(?: +(?<path>[^ ]*) +\S*)?" (?<code>[^ ]*) (?<size>[^ ]*))(?: "(?<referer>[^\"]*)" "(?<agent>[^\"]*)")?)$/, "%d/%b/%Y:%H:%M:%S %z")
+    TextParser.register_template(
+      'gelf-apache',
+      /^(?<full_message>(?<short_message>(?<client>[^ ]*) [^ ]* (?<user>[^ ]*) \[(?<time>[^\]]*)\] "(?<method>\S+)(?: +(?<path>[^ ]*) +\S*)?" (?<code>[^ ]*) (?<size>[^ ]*))(?: "(?<referer>[^\"]*)" "(?<agent>[^\"]*)")?)$/,
+      "%d/%b/%Y:%H:%M:%S %z",
+    )
 
     # Template 'gelf-apache-error'
     # short_message is a central non-greedy capture surrounded by attempts to grab Apache, PHP fields
     # full_message is entire line
 
-    TextParser.register_template('gelf-apache-error', /^(?<full_message>(\[(?<time>[^\]]*)\] \[(?<level>[^\]]*)\] \[[^\]]*\] )?(?<short_message>(PHP (?<php>[A-Za-z]+):)?.*?)( in (?<file>\/.*) on line (?<line>[0-9]+)(, referer: (?<referer>[^ ]*).*)?)?)$/, "%a %b %d %H:%M:%S %Y")
+    TextParser.register_template(
+      'gelf-apache-error',
+      /^(?<full_message>(?>\[(?<time>(?>[^\].]*(?>\.(?<msec>[0-9]{3})[0-9]*[^\]]*)?))\]\s\[(?>[^\]:]*:)?(?<level>(?>[^\]]*))\]\s(?>\[(?>[^\]]*)\]\s)*)?(?<short_message>(?>PHP\s(?<php>[A-Za-z\s]+):\s)?.*?)(?>\s+in\s(?<file>\/.*)\son\sline\s(?<line>(?>[0-9]+))(?>,\s(referer:\s(?<referer>(?>[^\s]*)))?.*)?)?)$/,
+      nil,
+    )
 
     # Template 'gelf-nginx'
     # short_message is "common log" format
@@ -43,7 +51,11 @@ class GELFTailInput < TailInput
     #                    '$upstream_cache_status "$upstream_http_cache_control" '
     #                    '$upstream_status time $upstream_response_time';
 
-    TextParser.register_template('gelf-nginx', /^(?<full_message>(?<short_message>(?<client>[^ ]*) [^ ]* (?<user>[^ ]*) \[(?<time>[^\]]*)\] "(?<method>\S+)(?: +(?<path>[^ ]*) +\S*)?" (?<code>[^ ]*) (?<size>[^ ]*))(?: "(?<referer>[^\"]*)" "(?<agent>[^\"]*)")?)(?: "(?<x-forwarded-for>[^\"]*)")?(?: [0-9]+\.(?<msec>[0-9]{3}) (?<scheme>[^ ]+) "(?<vhost>[^\"]*)" time (?<request_time>[0-9.]+) recv (?<request_length>[0-9]+) sent (?<bytes_sent>[0-9]+) \((?<body_bytes_sent>[0-9]+)\) from (- - "-" - time -|(?<upstream_addr>.+) (?<upstream_cache_status>.+) "(?<upstream_http_cache_control>[^\"]*)" (?<upstream_status>.+) time (?<upstream_response_time>.+)))?$/, "%d/%b/%Y:%H:%M:%S %z")
+    TextParser.register_template(
+      'gelf-nginx',
+      /^(?<full_message>(?<short_message>(?<client>(?>\S+)) - (?<user>(?>\S+)) \[(?<time>(?>[^\]]*))\] (?>"(?<method>\S+)(?: +(?<path>[^ ]*) +\S*)?") (?<code>(?>\S+)) (?<size>(?>\S+)))(?: (?>"(?<referer>[^\"]*)") (?>"(?<agent>[^\"]*)"))?)(?> "(?<x-forwarded-for>[^\"]*)")?(?> [0-9]+\.(?<msec>[0-9]{3}) (?<scheme>\S+) "(?<vhost>[^\"]*)" time (?<request_time>[0-9.]+) recv (?<request_length>[0-9]+) sent (?<bytes_sent>[0-9]+) \((?<body_bytes_sent>[0-9]+)\) from (?>- - "-" - time -|(?<upstream_addr>\S+)\s(?<upstream_cache_status>\S+)\s"(?<upstream_http_cache_control>[^\"]*)"\s(?<upstream_status>\S+)\stime\s(?<upstream_response_time>\S+)))?$/,
+      "%d/%b/%Y:%H:%M:%S %z",
+    )
 
     @parser = TextParser.new
     @parser.configure(conf)
@@ -51,7 +63,7 @@ class GELFTailInput < TailInput
 
   def parse_line(line)
     time, record = super(line)
-    
+
     if !record.nil? then
       if @gelfhost.nil? then
         if !record.has_key?('host') then

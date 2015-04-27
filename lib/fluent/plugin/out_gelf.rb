@@ -46,7 +46,7 @@ class GELFOutput < BufferedOutput
         if @use_record_host then gelfentry[:host] = v
         else gelfentry[:_host] = v end
       when 'level' then
-        case v.downcase
+        case "#{v}".downcase
         # emergency and alert aren't supported by gelf-rb
         when '0', 'emergency' then gelfentry[:level] = GELF::UNKNOWN
         when '1', 'alert' then gelfentry[:level] = GELF::UNKNOWN

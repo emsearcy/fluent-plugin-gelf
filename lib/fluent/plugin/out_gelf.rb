@@ -74,7 +74,7 @@ class GELFOutput < BufferedOutput
     end
 
     if !gelfentry.has_key?('short_message') then
-      gelfentry[:short_message] = record.to_json
+      gelfentry[:short_message] = Yajl.dump(record)
     end
 
     gelfentry.to_msgpack

@@ -86,7 +86,7 @@ class GELFOutput < BufferedOutput
       when 'short_message', 'full_message', 'facility', 'line', 'file' then
         gelfentry[k] = v
       else
-        gelfentry['_'+k] = v
+        gelfentry["_#{k}".to_sym] = v
       end
     end
 

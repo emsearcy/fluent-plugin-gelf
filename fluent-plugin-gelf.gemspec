@@ -1,11 +1,11 @@
 # coding: utf-8
 lib = File.expand_path('../lib', __FILE__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
-require 'fluent/plugin/gelf/version'
+require 'lib/fluent/plugin/version'
 
 Gem::Specification.new do |spec|
   spec.name          = "fluent-plugin-gelf"
-  spec.version       = Fluent::Plugin::Gelf::VERSION
+  spec.version       = VERSION
   spec.authors       = ["Eric Searcy"]
   spec.email         = [""]
 

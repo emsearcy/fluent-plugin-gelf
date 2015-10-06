@@ -8,6 +8,7 @@ class GELFOutput < BufferedOutput
   config_param :add_msec_time, :bool, :default => false
   config_param :host, :string, :default => nil
   config_param :port, :integer, :default => 12201
+  config_param :input_encoding, :string, :default => ""
 
   def initialize
     super
@@ -33,10 +34,19 @@ class GELFOutput < BufferedOutput
     super
   end
 
+  def set_encoding(value)
+    if @input_encoding != "" and value.is_a?(String)
+      value.force_encoding(@input_encoding)
+    else
+      value
+    end
+  end
+
   def format(tag, time, record)
     gelfentry = { :timestamp => time, :_tag => tag }
 
     record.each_pair do |k,v|
+      v = set_encoding(v)
       case k
       when 'version' then
         gelfentry[:_version] = v

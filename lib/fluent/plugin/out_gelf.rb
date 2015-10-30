@@ -67,9 +67,9 @@ class GELFOutput < BufferedOutput
           gelfentry[:_msec] = v
         end
       when 'short_message', 'full_message', 'facility', 'line', 'file' then
-        gelfentry[k] = v
+        gelfentry[k] = v.encode('UTF-8', {:invalid => :replace, :undef => :replace, :replace => '?'})
       else
-        gelfentry['_'+k] = v
+        gelfentry['_'+k] = v.encode('UTF-8', {:invalid => :replace, :undef => :replace, :replace => '?'})
       end
     end
 

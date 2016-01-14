@@ -12,6 +12,7 @@ class GELFOutput < BufferedOutput
   def initialize
     super
     require "gelf"
+    require 'kconv'
   end
 
   def configure(conf)
@@ -37,6 +38,7 @@ class GELFOutput < BufferedOutput
     gelfentry = { :timestamp => time, :_tag => tag }
 
     record.each_pair do |k,v|
+      v = v.toutf8
       case k
       when 'version' then
         gelfentry[:_version] = v

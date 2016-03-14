@@ -8,6 +8,7 @@ class GELFOutput < BufferedOutput
   config_param :add_msec_time, :bool, :default => false
   config_param :host, :string, :default => nil
   config_param :port, :integer, :default => 12201
+  config_param :protocol, :string, :default => 'udp'
 
   def initialize
     super
@@ -17,11 +18,20 @@ class GELFOutput < BufferedOutput
   def configure(conf)
     super
     raise ConfigError, "'host' parameter required" unless conf.has_key?('host')
+    raise ConfigError, "'protocol' parameter should be either 'udp' or 'tcp'" unless ['udp', 'tcp'].include?(conf['protocol'])
   end
 
   def start
     super
-    @conn = GELF::Notifier.new(@host, @port, 'WAN', {:facility => 'fluentd'})
+
+    case @protocol
+    when 'udp' then proto = GELF::Protocol::UDP
+    when 'tcp' then proto = GELF::Protocol::TCP
+    else
+      proto = GELF::Protocol::UDP
+    end
+
+    @conn = GELF::Notifier.new(@host, @port, 'WAN', {:facility => 'fluentd', :protocol => proto})
 
     # Errors are not coming from Ruby so we use direct mapping
     @conn.level_mapping = 'direct'

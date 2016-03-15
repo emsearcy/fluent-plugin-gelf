@@ -2,7 +2,7 @@ module Fluent
 
 class GELFOutput < BufferedOutput
 
-  Plugin.register_output("gelf", self)    
+  Plugin.register_output("gelf", self)
 
   config_param :use_record_host, :bool, :default => false
   config_param :add_msec_time, :bool, :default => false
@@ -61,19 +61,21 @@ class GELFOutput < BufferedOutput
         end
       when 'msec' then
         # msec must be three digits (leading/trailing zeroes)
-        if @add_msec_time then 
+        if @add_msec_time then
           gelfentry[:timestamp] = (time.to_s + "." + v).to_f
         else
           gelfentry[:_msec] = v
         end
+      when 'log', 'request', 'message' then
+        gelfentry[:short_message] = v
       when 'short_message', 'full_message', 'facility', 'line', 'file' then
-        gelfentry[k] = v
+        gelfentry[k.to_sym] = v
       else
-        gelfentry['_'+k] = v
+        gelfentry[('_'+k).to_sym] = v
       end
     end
 
-    if !gelfentry.has_key?('short_message') then
+    if !gelfentry.has_key?(:short_message) then
       gelfentry[:short_message] = record.to_json
     end
 

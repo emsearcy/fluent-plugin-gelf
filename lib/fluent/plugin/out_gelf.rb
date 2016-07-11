@@ -18,7 +18,7 @@ class GELFOutput < BufferedOutput
   def configure(conf)
     super
     raise ConfigError, "'host' parameter required" unless conf.has_key?('host')
-    raise ConfigError, "'protocol' parameter should be either 'udp' or 'tcp'" unless ['udp', 'tcp'].include?(conf['protocol'])
+    raise ConfigError, "'protocol' parameter should be either 'udp' or 'tcp'" unless ['udp', 'tcp'].include?(@protocol)
   end
 
   def start

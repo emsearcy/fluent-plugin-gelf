@@ -72,7 +72,7 @@ class GELFOutput < BufferedOutput
       when 'msec' then
         # msec must be three digits (leading/trailing zeroes)
         if @add_msec_time then 
-          gelfentry[:timestamp] = (time.to_s + "." + v).to_f
+          gelfentry[:timestamp] = "#{time.to_s}.#{v}".to_f
         else
           gelfentry[:_msec] = v
         end

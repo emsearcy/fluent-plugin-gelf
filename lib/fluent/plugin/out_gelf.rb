@@ -17,21 +17,22 @@ class GELFOutput < BufferedOutput
 
   def configure(conf)
     super
-    raise ConfigError, "'host' parameter required" unless conf.has_key?('host')
-    raise ConfigError, "'protocol' parameter should be either 'udp' or 'tcp'" unless ['udp', 'tcp'].include?(conf['protocol'])
+
+    # a destination hostname or IP address must be provided
+    raise ConfigError, "'host' parameter (hostname or address of Graylog2 server) is required" unless conf.has_key?('host')
+
+    # choose protocol to pass to gelf-rb Notifier constructor
+    # (@protocol is used instead of conf['protocol'] to leverage config_param default)
+    if @protocol == 'udp' then @proto = GELF::Protocol::UDP
+    elsif @protocol == 'tcp' then @proto = GELF::Protocol::TCP
+    else raise ConfigError, "'protocol' parameter should be either 'udp' (default) or 'tcp'"
+    end
   end
 
   def start
     super
 
-    case @protocol
-    when 'udp' then proto = GELF::Protocol::UDP
-    when 'tcp' then proto = GELF::Protocol::TCP
-    else
-      proto = GELF::Protocol::UDP
-    end
-
-    @conn = GELF::Notifier.new(@host, @port, 'WAN', {:facility => 'fluentd', :protocol => proto})
+    @conn = GELF::Notifier.new(@host, @port, 'WAN', {:facility => 'fluentd', :protocol => @proto})
 
     # Errors are not coming from Ruby so we use direct mapping
     @conn.level_mapping = 'direct'

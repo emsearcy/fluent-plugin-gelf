@@ -45,7 +45,13 @@ class GELFOutput < BufferedOutput
   end
 
   def format(tag, time, record)
-    gelfentry = { :timestamp => time, :_tag => tag }
+    if time.is_a? Fluent::EventTime then
+      timestamp = time.sec + (time.nsec.to_f/1000000000).round(3)
+    else
+      timestamp = time
+    end
+
+    gelfentry = { :timestamp => timestamp, :_tag => tag }
 
     record.each_pair do |k,v|
       case k

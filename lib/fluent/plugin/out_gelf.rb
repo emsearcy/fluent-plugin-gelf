@@ -90,7 +90,7 @@ class GELFOutput < BufferedOutput
       end
     end
 
-    if !gelfentry.has_key?('short_message') then
+    if gelfentry['short_message'].to_s.empty? then
       gelfentry[:short_message] = record.to_json
     end
 

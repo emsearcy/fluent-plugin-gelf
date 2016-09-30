@@ -45,7 +45,7 @@ class GELFOutput < BufferedOutput
   end
 
   def format(tag, time, record)
-    if time.is_a? Fluent::EventTime then
+    if defined? Fluent::EventTime and time.is_a? Fluent::EventTime then
       timestamp = time.sec + (time.nsec.to_f/1000000000).round(3)
     else
       timestamp = time

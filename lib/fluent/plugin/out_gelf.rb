@@ -83,8 +83,6 @@ class GELFOutput < BufferedOutput
         else
           gelfentry[:_msec] = v
         end
-      when 'log', 'request', 'message' then
-        gelfentry[:short_message] = v
       when 'short_message', 'full_message', 'facility', 'line', 'file' then
         gelfentry[k.to_sym] = v
       else
@@ -93,7 +91,17 @@ class GELFOutput < BufferedOutput
     end
 
     if !gelfentry.has_key?(:short_message) or gelfentry[:short_message].to_s.empty? then
-      gelfentry[:short_message] = record.to_json
+      # allow other non-empty fields to masquerade as the short_message if it is unset
+      if gelfentry.has_key?(:_message) and !gelfentry[:_message].to_s.empty? then
+        gelfentry[:short_message] = gelfentry.delete(:_message)
+      elsif gelfentry.has_key?(:_log) and !gelfentry[:_log].to_s.empty? then
+        gelfentry[:short_message] = gelfentry.delete(:_log)
+      elsif gelfentry.has_key?(:_record) and !gelfentry[:_record].to_s.empty? then
+        gelfentry[:short_message] = gelfentry.delete(:_record)
+      else
+        # we must have a short_message, so fall back to a basic json encoding
+        gelfentry[:short_message] = record.to_json
+      end
     end
 
     gelfentry.to_msgpack

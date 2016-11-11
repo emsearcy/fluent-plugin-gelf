@@ -99,8 +99,8 @@ class GELFOutput < BufferedOutput
       elsif gelfentry.has_key?(:_record) and !gelfentry[:_record].to_s.empty? then
         gelfentry[:short_message] = gelfentry.delete(:_record)
       else
-        # we must have a short_message, so fall back to a basic json encoding
-        gelfentry[:short_message] = record.to_json
+        # we must have a short_message, so provide placeholder
+        gelfentry[:short_message] = '(no message)'
       end
     end
 

@@ -99,6 +99,8 @@ class GELFOutput < BufferedOutput
       # allow other non-empty fields to masquerade as the short_message if it is unset
       if gelfentry.has_key?(:_message) and !gelfentry[:_message].to_s.empty? then
         gelfentry[:short_message] = gelfentry.delete(:_message)
+      elsif gelfentry.has_key?(:_msg) and !gelfentry[:_msg].to_s.empty? then
+        gelfentry[:short_message] = gelfentry.delete(:_msg)
       elsif gelfentry.has_key?(:_log) and !gelfentry[:_log].to_s.empty? then
         gelfentry[:short_message] = gelfentry.delete(:_log)
       elsif gelfentry.has_key?(:_record) and !gelfentry[:_record].to_s.empty? then

@@ -19,7 +19,7 @@ class GELFOutput < BufferedOutput
   end
 
   def configure(conf)
-    super
+    super(conf)
 
     # a destination hostname or IP address must be provided
     raise ConfigError, "'host' parameter (hostname or address of Graylog2 server) is required" unless conf.has_key?('host')

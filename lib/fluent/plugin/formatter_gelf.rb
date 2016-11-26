@@ -13,7 +13,7 @@ module Fluent
       config_param :add_msec_time, :bool, :default => false
 
       def configure(conf)
-        super
+        super(conf)
         require 'gelf'
       end
 

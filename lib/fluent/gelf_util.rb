@@ -2,7 +2,12 @@ module Fluent
   module GelfUtil
 
     def make_gelfentry(tag,time,record, conf = {})
-      gelfentry = { 'timestamp' => time, '_tag' => tag }
+      gelfentry = { '_tag' => tag }
+      if defined? Fluent::EventTime and time.is_a? Fluent::EventTime then
+        gelfentry['timestamp'] = time.sec + (time.nsec.to_f/1000000000).round(3)
+      else
+        gelfentry['timestamp'] = time
+      end
 
       record.each_pair do |k,v|
         case k
@@ -49,11 +54,19 @@ module Fluent
         end
       end
 
-      if gelfentry['short_message'].nil? or gelfentry['short_message'].empty? then
-        if not (gelfentry['_message'].nil? or gelfentry['_message'].empty?) then
+      if !gelfentry.key?('short_message') or gelfentry['short_message'].to_s.empty? then
+        # allow other non-empty fields to masquerade as the short_message if it is unset
+        if gelfentry.key?('_message') and !gelfentry['_message'].to_s.empty? then
           gelfentry['short_message'] = gelfentry.delete('_message')
+        elsif gelfentry.key?('_msg') and !gelfentry['_msg'].to_s.empty? then
+          gelfentry['short_message'] = gelfentry.delete('_msg')
+        elsif gelfentry.key?('_log') and !gelfentry['_log'].to_s.empty? then
+          gelfentry['short_message'] = gelfentry.delete('_log')
+        elsif gelfentry.key?('_record') and !gelfentry['_record'].to_s.empty? then
+          gelfentry['short_message'] = gelfentry.delete('_record')
         else
-          gelfentry['short_message'] = record.to_json
+          # we must have a short_message, so provide placeholder
+          gelfentry['short_message'] = '(no message)'
         end
       end
 

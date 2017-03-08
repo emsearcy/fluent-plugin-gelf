@@ -73,8 +73,12 @@ class GELFOutput < BufferedOutput
   def formatted_to_msgpack_binary
     true
   end
-end
 
+  def formatted_to_msgpack_binary
+    true
+  end
+
+end
 
 end
 

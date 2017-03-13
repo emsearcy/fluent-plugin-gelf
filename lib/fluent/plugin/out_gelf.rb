@@ -4,6 +4,7 @@ module Fluent
 
     Plugin.register_output("gelf", self)
 
+    require 'gelf'
     require 'fluent/gelf_util'
     include GelfUtil
 
@@ -15,7 +16,6 @@ module Fluent
 
     def initialize
       super
-      require "gelf"
     end
 
     def configure(conf)

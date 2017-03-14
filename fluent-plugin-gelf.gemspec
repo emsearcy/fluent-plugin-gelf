@@ -26,4 +26,6 @@ Gem::Specification.new do |s|
     'provides' => 'fluent-plugin-gelf = 0.1.0',
     'conflicts' => 'fluent-plugin-gelf'
   }
+  gem.signing_key = File.expand_path('~/certs/oss@hotschedules.com.key') if $0 =~ /gem\z/
+  gem.cert_chain    = %w[certs/oss@hotschedules.com.cert]
 end

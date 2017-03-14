@@ -1,4 +1,4 @@
-/vendor/
-/.bundle/
-Gemfile.lock
-/pkg/
+/certs/*key*
+/certs/*priv*
+**.gem
+**.gem.sha*

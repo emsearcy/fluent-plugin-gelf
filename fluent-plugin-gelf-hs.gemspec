@@ -20,12 +20,14 @@ Gem::Specification.new do |s|
 
   s.add_runtime_dependency "fluentd"
   s.add_runtime_dependency "gelf", ">= 2.0.0"
-  # This type of metadata is not supported by gem, but can be incorporated
-  # by other packaging systems (ie. rpm).
-  s.metadata = {
-    'provides' => 'fluent-plugin-gelf = 0.1.0',
-    'conflicts' => 'fluent-plugin-gelf'
-  }
-  gem.signing_key = File.expand_path('~/certs/oss@hotschedules.com.key') if $0 =~ /gem\z/
-  gem.cert_chain    = %w[certs/oss@hotschedules.com.cert]
+
+  ## Disabling since this appears to have a gem version dependencey.
+  ## This type of metadata is not supported by gem, but can be incorporated
+  ## by other packaging systems (ie. rpm).
+  #s.metadata = {
+  #  'provides' => 'fluent-plugin-gelf = 0.1.0',
+  #  'conflicts' => 'fluent-plugin-gelf'
+  #}
+  s.signing_key = File.expand_path('~/certs/oss@hotschedules.com.key') if $0 =~ /gem\z/
+  s.cert_chain    = %w[certs/oss@hotschedules.com.cert]
 end

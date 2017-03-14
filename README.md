@@ -1,4 +1,5 @@
 # Fluentd GELF output and formatter plugins
+This is a fork of the fluent-plugin-gelf (https://github.com/emsearcy/fluent-plugin-gelf) created in order to publish a gem with the changes contained in pull request #34.
 
 ## Overview
 Fluentd GELF output and formatter plugins.

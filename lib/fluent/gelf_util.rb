@@ -20,25 +20,31 @@ module Fluent
             gelfentry['_host'] = v
           end
         when 'level' then
-          case v.to_s.downcase
+          case v.to_s.downcase[0]
           # emergency and alert aren't supported by gelf-rb
-          when /^(0|emerg)/ then
+          when "0" then
             gelfentry['level'] = GELF::UNKNOWN
-          when /^(1|a)/ then
+          when "1", "a" then
             gelfentry['level'] = GELF::UNKNOWN
-          when /^(2|c)/ then
+          when "2", "c" then
             gelfentry['level'] = GELF::FATAL
-          when /^(3|e)/ then
+          when "3" then
             gelfentry['level'] = GELF::ERROR
-          when /^(4|w)/ then
+          when "4", "w" then
             gelfentry['level'] = GELF::WARN
           # gelf-rb also skips notice
-          when /^(5|n)/ then
+          when "5", "n" then
             gelfentry['level'] = GELF::INFO
-          when /^(6|i)/ then
+          when "6", "i" then
             gelfentry['level'] = GELF::INFO
-          when /^(7|d)/ then
+          when "7", "d" then
             gelfentry['level'] = GELF::DEBUG
+          when "e" then
+            if v.to_s.length >= 2 and v.to_s.downcase[1] != "r" then
+              gelfentry['level'] = GELF::UNKNOWN
+            else
+              gelfentry['level'] = GELF::ERROR
+            end
           else
             gelfentry['_level'] = v
           end

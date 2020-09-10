@@ -1,6 +1,11 @@
 module Fluent
 
 class GELFOutput < BufferedOutput
+  class IdentityMap
+    def self.[](x)
+      x
+    end
+  end
 
   Plugin.register_output("gelf", self)
 
@@ -35,7 +40,7 @@ class GELFOutput < BufferedOutput
     @conn = GELF::Notifier.new(@host, @port, 'WAN', {:facility => 'fluentd', :protocol => @proto})
 
     # Errors are not coming from Ruby so we use direct mapping
-    @conn.level_mapping = 'direct'
+    @conn.level_mapping = IdentityMap
     # file and line from Ruby are in this class, not relevant
     @conn.collect_file_and_line = false
   end
@@ -63,18 +68,19 @@ class GELFOutput < BufferedOutput
         if @use_record_host then gelfentry[:host] = v
         else gelfentry[:_host] = v end
       when 'level' then
-        case "#{v}".downcase
-        # emergency and alert aren't supported by gelf-rb
-        when '0', 'emergency' then gelfentry[:level] = GELF::UNKNOWN
-        when '1', 'alert' then gelfentry[:level] = GELF::UNKNOWN
-        when '2', 'critical', 'crit' then gelfentry[:level] = GELF::FATAL
-        when '3', 'error', 'err' then gelfentry[:level] = GELF::ERROR
-        when '4', 'warning', 'warn' then gelfentry[:level] = GELF::WARN
-        # gelf-rb also skips notice
-        when '5', 'notice' then gelfentry[:level] = GELF::INFO
-        when '6', 'informational', 'info' then gelfentry[:level] = GELF::INFO
-        when '7', 'debug' then gelfentry[:level] = GELF::DEBUG
-        else gelfentry[:_level] = v
+        if v.is_a? Fixnum then gelfentry[:level] = v
+        else
+          case v.to_s.downcase
+          when 'emergency' then gelfentry[:level] = 0
+          when 'alert' then gelfentry[:level] = 1
+          when 'critical', 'crit' then gelfentry[:level] = 2
+          when 'error', 'err' then gelfentry[:level] = 3
+          when 'warning', 'warn' then gelfentry[:level] = 4
+          when 'notice' then gelfentry[:level] = 5
+          when 'informational', 'info' then gelfentry[:level] = 6
+          when 'debug' then gelfentry[:level] = 7
+          else gelfentry[:_level] = v
+          end
         end
       when 'msec' then
         # msec must be three digits (leading/trailing zeroes)

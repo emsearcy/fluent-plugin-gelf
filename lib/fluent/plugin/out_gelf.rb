@@ -15,6 +15,10 @@ class GELFOutput < BufferedOutput
     require "gelf"
   end
 
+  def multi_workers_ready?
+    true
+  end
+
   def configure(conf)
     super
 
